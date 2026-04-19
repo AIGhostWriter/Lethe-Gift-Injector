@@ -1,7 +1,6 @@
-// LetheGiftInjector (ver.2.7)
-// - StaticDataManager 전수 조사로 확인된 미등록 9xxx / 2xxx / 1xxx ID 전부 추가
-// - 이름 미확인 항목은 (ID:XXXX) 플레이스홀더로 표시 → 인게임 확인 후 교체
-// - 99xxxx / 992xxx / 995xxx 는 적 버프 내부 시스템 데이터라 제외
+// LetheGiftInjector (ver.2.8.0)
+// - 플레이스홀더 ID 이름 대량 업데이트 (공개 데이터 기반)
+// - 미확인 항목은 (ID:XXXX) 유지
 
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -16,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace LetheGiftInjector
 {
-    [BepInPlugin("com.mod.lethegiftinjector", "LetheGiftInjector", "2.7.0")]
+    [BepInPlugin("com.mod.lethegiftinjector", "LetheGiftInjector", "2.8.0")]
     public class LetheGiftInjectorPlugin : BasePlugin
     {
         internal static new ManualLogSource? Log;
@@ -26,7 +25,7 @@ namespace LetheGiftInjector
         public override void Load()
         {
             Log = base.Log;
-            Log.LogInfo("LetheGiftInjector v2.7 로드");
+            Log.LogInfo("LetheGiftInjector v2.8.0 로드");
             AddComponent<InjectorUI>();
         }
     }
@@ -51,7 +50,7 @@ namespace LetheGiftInjector
         private int _giftPage = 0;
         private const int PAGE_SIZE = 8;
 
-        private Rect    _windowRect  = new Rect(20, 20, 520, 640);
+        private Rect    _windowRect  = new Rect(20, 20, 540, 640);
         private bool    _isDragging  = false;
         private Vector2 _dragOffset  = Vector2.zero;
 
@@ -224,35 +223,35 @@ namespace LetheGiftInjector
             (9154,"Imposed Weight","None"),
             // ── 시즌별 추가 기프트 ─────────────────────────────────────────────
             (9155,"Decamillennial Stewpot","Combustion"),
-            (9156,"(ID:9156)","Combustion"),
+            (9156,"Decamillennial Hearthflame","Combustion"),
             (9157,"Secret Cookbook","Combustion"),
-            (9158,"(ID:9158)","Combustion"),
+            (9158,"Purloined Flame","Combustion"),
             (9159,"Millarca","Laceration"),
-            (9160,"(ID:9160)","Laceration"),
+            (9160,"Ruptured Blood Sac","Laceration"),
             (9161,"Devotion","Laceration"),
-            (9162,"(ID:9162)","Laceration"),
-            (9163,"(ID:9163)","Vibration"),
-            (9164,"(ID:9164)","Vibration"),
+            (9162,"Hemorrhagic Shock","Laceration"),
+            (9163,"Gemstone Oscillator","Vibration"),
+            (9164,"Wobbling Keg","Vibration"),
             (9165,"Interlocked Cogs","Vibration"),
-            (9166,"(ID:9166)","Vibration"),
-            (9167,"(ID:9167)","Vibration"),
-            (9168,"(ID:9168)","Burst"),
+            (9166,"Epicenter","Vibration"),
+            (9167,"Omnivibro-octovecti-bell","Vibration"),
+            (9168,"Shard of Apocalypse","Burst"),
             (9169,"Thorny Rope Cuffs","Burst"),
-            (9170,"(ID:9170)","Burst"),
-            (9171,"(ID:9171)","Burst"),
-            (9172,"(ID:9172)","Sinking"),
-            (9173,"(ID:9173)","Sinking"),
+            (9170,"Eerie Effigy","Burst"),
+            (9171,"Ruin","Burst"),
+            (9172,"Cantabile","Sinking"),
+            (9173,"Faded Overcoat","Sinking"),
             (9174,"Tangled Bones","Sinking"),
-            (9175,"(ID:9175)","Sinking"),
-            (9176,"(ID:9176)","Sinking"),
+            (9175,"Surging Globe","Sinking"),
+            (9176,"Impending Wave","Sinking"),
             (9177,"Recollection of a Certain Day","Breath"),
-            (9178,"(ID:9178)","Breath"),
+            (9178,"Angel's Cut","Breath"),
             (9179,"Reminiscence","Breath"),
-            (9180,"(ID:9180)","Breath"),
-            (9181,"(ID:9181)","Charge"),
+            (9180,"Cask Spirits","Breath"),
+            (9181,"Miniature Telepole","Charge"),
             (9182,"T-1B Octagonal Bolt","Charge"),
-            (9183,"(ID:9183)","Charge"),
-            (9184,"(ID:9184)","Charge"),
+            (9183,"Insulator","Charge"),
+            (9184,"T-5 Perpetual Motion Machine","Charge"),
             (9185,"Rebate Token","None"),
             (9186,"New Release Pamphlet","None"),
             (9187,"Special Catalogue","None"),
@@ -261,18 +260,18 @@ namespace LetheGiftInjector
             (9190,"Trial Plan Guide","None"),
             (9191,"Prestige Card","None"),
             (9192,"Layered Bandages","None"),
-            (9193,"(ID:9193)","Slash"),
-            (9194,"(ID:9194)","None"),
-            (9195,"(ID:9195)","Slash"),
-            (9196,"(ID:9196)","Slash"),
-            (9197,"(ID:9197)","None"),
-            (9198,"(ID:9198)","None"),
-            (9199,"(ID:9199)","None"),
-            (9200,"(ID:9200)","None"),
-            (9201,"(ID:9201)","Hit"),
-            (9202,"(ID:9202)","None"),
-            (9203,"(ID:9203)","Hit"),
-            (9204,"(ID:9204)","Hit"),
+            (9193,"Overused Whetstone","Slash"),
+            (9194,"Short Cane Sword","None"),
+            (9195,"Cloudpattern Gourd Bottle","Slash"),
+            (9196,"Broken Greatsword","Slash"),
+            (9197,"High-tensility Shoes","None"),
+            (9198,"Plume of Proof","None"),
+            (9199,"Torn Hems","None"),
+            (9200,"Dueling Manual Book 3","None"),
+            (9201,"Dimensional Recycle Bin","Hit"),
+            (9202,"Pocket Flashcards","None"),
+            (9203,"Dimensional Perception Modifier","Hit"),
+            (9204,"The Book of Vengeance","Hit"),
             (9205,"(ID:9205)","Laceration"),
             (9206,"(ID:9206)","Laceration"),
             (9207,"(ID:9207)","None"),
@@ -354,11 +353,11 @@ namespace LetheGiftInjector
             (9433,"Chief Butler's Secret Arts","None"),
             (9434,"Handheld Mirror","None"),
             (9435,"(ID:9435)","None"),
-            (9436,"(ID:9436)","Sinking"),
-            (9437,"(ID:9437)","Laceration"),
-            (9438,"(ID:9438)","Laceration"),
-            (9439,"(ID:9439)","None"),
-            (9440,"(ID:9440)","Laceration"),
+            (9436,"Refraction Glass Pod","Sinking"),
+            (9437,"La Manchaland All-day Pass","Laceration"),
+            (9438,"Token of Victory","Laceration"),
+            (9439,"Devouring Cube","None"),
+            (9440,"Mask of the Parade","Laceration"),
             (9701,"Hot 'n Juicy Drumstick","Combustion"),
             (9702,"Dry-to-the-Bone Breast","Burst"),
             (9703,"Tango Marinade","None"),
@@ -371,56 +370,56 @@ namespace LetheGiftInjector
             (9710,"Huge Gift Sack","Breath"),
             (9711,"Sad Plushie","None"),
             (9712,"Black Ledger","None"),
-            (9713,"(ID:9713)","Slash"),
-            (9714,"(ID:9714)","Laceration"),
-            (9715,"(ID:9715)","Breath"),
-            (9716,"(ID:9716)","Slash"),
-            (9717,"(ID:9717)","Slash"),
-            (9718,"(ID:9718)","Slash"),
-            (9719,"(ID:9719)","Breath"),
-            (9720,"(ID:9720)","Slash"),
-            (9721,"(ID:9721)","Vibration"),
-            (9722,"(ID:9722)","Vibration"),
-            (9723,"(ID:9723)","None"),
-            (9724,"(ID:9724)","Vibration"),
-            (9725,"(ID:9725)","Vibration"),
-            (9726,"(ID:9726)","Vibration"),
-            (9727,"(ID:9727)","None"),
-            (9728,"(ID:9728)","Vibration"),
-            (9729,"(ID:9729)","Vibration"),
-            (9730,"(ID:9730)","Vibration"),
-            (9731,"(ID:9731)","Vibration"),
-            (9732,"(ID:9732)","None"),
-            (9733,"(ID:9733)","None"),
-            (9734,"(ID:9734)","Charge"),
-            (9735,"(ID:9735)","Charge"),
-            (9736,"(ID:9736)","Charge"),
-            (9737,"(ID:9737)","Charge"),
-            (9738,"(ID:9738)","Charge"),
-            (9739,"(ID:9739)","Laceration"),
-            (9740,"(ID:9740)","Charge"),
-            (9741,"(ID:9741)","Charge"),
-            (9742,"(ID:9742)","Charge"),
-            (9743,"(ID:9743)","Charge"),
-            (9744,"(ID:9744)","Laceration"),
-            (9745,"(ID:9745)","Charge"),
-            (9746,"(ID:9746)","Sinking"),
-            (9747,"(ID:9747)","Sinking"),
-            (9748,"(ID:9748)","None"),
-            (9749,"(ID:9749)","None"),
-            (9750,"(ID:9750)","Sinking"),
-            (9751,"(ID:9751)","None"),
-            (9752,"(ID:9752)","None"),
-            (9753,"(ID:9753)","None"),
-            (9754,"(ID:9754)","None"),
-            (9755,"(ID:9755)","None"),
-            (9756,"(ID:9756)","Combustion"),
-            (9757,"(ID:9757)","None"),
-            (9758,"(ID:9758)","None"),
-            (9759,"(ID:9759)","Vibration"),
-            (9760,"(ID:9760)","None"),
-            (9761,"(ID:9761)","Vibration"),
-            (9762,"(ID:9762)","None"),
+            (9713,"Rusted Hilt","Slash"),
+            (9714,"Fractured Blade","Laceration"),
+            (9715,"Broken Blade","Breath"),
+            (9716,"Red Tassel","Slash"),
+            (9717,"Sublimity","Slash"),
+            (9718,"Unbending","Slash"),
+            (9719,"Ragged Bamboo Hat","Breath"),
+            (9720,"Old Dopo Robe","Slash"),
+            (9721,"Silver Watch Case","Vibration"),
+            (9722,"Faded Watch Case","Vibration"),
+            (9723,"Warning Notice","None"),
+            (9724,"Etched Clock Hands","Vibration"),
+            (9725,"Rusted Clock Hands","Vibration"),
+            (9726,"Chalice of Trickle-down","Vibration"),
+            (9727,"Prepaid Time Receipt","None"),
+            (9728,"Pocket Watch : Type L","Vibration"),
+            (9729,"Pocket Watch : Type E","Vibration"),
+            (9730,"Pocket Watch : Type Y","Vibration"),
+            (9731,"Pocket Watch : Type P","Vibration"),
+            (9732,"Economy Class Discount Voucher","None"),
+            (9733,"Canned Ice Cream","None"),
+            (9734,"E-Type Dimensional Dagger","Charge"),
+            (9735,"Portable Barrier Battery","Charge"),
+            (9736,"Biogenerative Battery","Charge"),
+            (9737,"Cardiovascular Reactive Module","Charge"),
+            (9738,"Prosthetic Joint Servos","Charge"),
+            (9739,"Crystallized Blood","Laceration"),
+            (9740,"Automated Joints","Charge"),
+            (9741,"Overcharged Battery","Charge"),
+            (9742,"Perpetual Generator Servos","Charge"),
+            (9743,"Hearts-powered Jewel","Charge"),
+            (9744,"Filial Love","Laceration"),
+            (9745,"Misaligned Transistor","Charge"),
+            (9746,"Mental Corruption Boosting Gas","Sinking"),
+            (9747,"Leaked Enkephalin","Sinking"),
+            (9748,"Hardship","None"),
+            (9749,"Crown of Thorns","None"),
+            (9750,"Rest","Sinking"),
+            (9751,"Snake Slough","None"),
+            (9752,"False Halo","None"),
+            (9753,"Metronome","None"),
+            (9754,"Bridle","None"),
+            (9755,"Contempt of the Gaze of Contempt","None"),
+            (9756,"Unhatched Embers","Combustion"),
+            (9757,"Anti-Ovine Grounding Plug","None"),
+            (9758,"Vestiges of the King","None"),
+            (9759,"Snuffed Lantern","Vibration"),
+            (9760,"Snuffed Candlestick","None"),
+            (9761,"Shadow Monster","Vibration"),
+            (9762,"Packaging Box","None"),
             (9763,"(ID:9763)","None"),
             (9764,"(ID:9764)","None"),
             (9765,"(ID:9765)","Breath"),
@@ -574,7 +573,7 @@ namespace LetheGiftInjector
         {
             if (!_showPanel) return;
 
-            GUI.Box(_windowRect, "Lethe Gift Injector ver.2.7");
+            GUI.Box(_windowRect, "Lethe Gift Injector ver.2.8.0");
 
             var titleBar = new Rect(_windowRect.x, _windowRect.y, _windowRect.width, 20);
             var e = Event.current;
@@ -682,13 +681,11 @@ namespace LetheGiftInjector
 
             int totalPages = Math.Max(1, (filtered.Count + PAGE_SIZE - 1) / PAGE_SIZE);
             GUILayout.BeginHorizontal();
-            GUI.enabled = _giftPage > 0;
-            if (GUILayout.Button("<", GUILayout.Width(35))) _giftPage--;
-            GUI.enabled = true;
+            if (GUILayout.Button("<", GUILayout.Width(35)) && _giftPage > 0)
+                _giftPage--;
             GUILayout.Label($"{_giftPage + 1} / {totalPages}", GUILayout.Width(65));
-            GUI.enabled = _giftPage < totalPages - 1;
-            if (GUILayout.Button(">", GUILayout.Width(35))) _giftPage++;
-            GUI.enabled = true;
+            if (GUILayout.Button(">", GUILayout.Width(35)) && _giftPage < totalPages - 1)
+                _giftPage++;
             GUILayout.EndHorizontal();
 
             GUILayout.EndArea();
