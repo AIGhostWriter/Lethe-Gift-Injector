@@ -640,21 +640,35 @@ namespace LetheGiftInjector
 
             GUILayout.Space(4);
 
-            GUILayout.Label("기프트 목록:");
             GUILayout.BeginHorizontal();
             for (int i = 0; i < _kwRow1.Length; i++)
             {
                 int idx = i;
+                // 변경점: 토글이 true를 반환하고, 동시에 이전 인덱스와 다를 때만 실행
                 if (GUILayout.Toggle(_kwIndex == idx, _kwRow1[i], "Button", GUILayout.Width(82)))
-                { _kwIndex = idx; _giftPage = 0; }
+                { 
+                    if (_kwIndex != idx)
+                    {
+                        _kwIndex = idx; 
+                        _giftPage = 0; 
+                    }
+                }
             }
             GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             for (int i = 0; i < _kwRow2.Length; i++)
             {
                 int idx = i + _kwRow1.Length;
+                // 변경점: 위와 동일
                 if (GUILayout.Toggle(_kwIndex == idx, _kwRow2[i], "Button", GUILayout.Width(82)))
-                { _kwIndex = idx; _giftPage = 0; }
+                { 
+                    if (_kwIndex != idx)
+                    {
+                        _kwIndex = idx; 
+                        _giftPage = 0; 
+                    }
+                }
             }
             GUILayout.EndHorizontal();
 
