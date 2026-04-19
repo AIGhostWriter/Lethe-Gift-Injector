@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>LetheGiftInjector</AssemblyName>
+    <RootNamespace>LetheGiftInjector</RootNamespace>
+    <Version>2.1.0</Version>
+    <LangVersion>10</LangVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <NoWarn>8600;8601;8602;8603;8604</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.649" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>C:\Users\이동혁\Desktop\LIMBUS\LetheLauncher-Distribution-7\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>C:\Users\이동혁\Desktop\LIMBUS\LetheLauncher-Distribution-7\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>C:\Users\이동혁\Desktop\LIMBUS\LetheLauncher-Distribution-7\BepInEx\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>C:\Users\이동혁\Desktop\LIMBUS\LetheLauncher-Distribution-7\BepInEx\interop\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>C:\Users\이동혁\Desktop\LIMBUS\LetheLauncher-Distribution-7\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>C:\Users\이동혁\Desktop\LIMBUS\LetheLauncher-Distribution-7\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
