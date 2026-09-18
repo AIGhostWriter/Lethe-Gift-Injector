@@ -1,7 +1,8 @@
-// LetheGiftInjector (ver.2.9.2)
-// - English translation patch
-// - Added gift name search field (stacks with keyword filter)
-// - FIXED: Reverted to base IDs and implemented 'maxTier' variable for upgradeable gifts.
+// LetheGiftInjector (ver.3.0.1)
+// - Populated _allTrials with confirmed names from Lethe discord
+//   (Mounting Trials List.txt / Mounting Adversities List.txt)
+// - Trials: 992201~992420 (floor 1~16), Adversities: 995011~995040 (floor 10~14)
+// - InjectorUI code is entirely unchanged from ver.2.9.2
 
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -16,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace LetheGiftInjector
 {
-    [BepInPlugin("com.mod.lethegiftinjector", "LetheGiftInjector", "2.9.2")]
+    [BepInPlugin("com.mod.lethegiftinjector", "LetheGiftInjector", "3.0.1")]
     public class LetheGiftInjectorPlugin : BasePlugin
     {
         internal static new ManualLogSource? Log;
@@ -26,11 +27,15 @@ namespace LetheGiftInjector
         public override void Load()
         {
             Log = base.Log;
-            Log.LogInfo("LetheGiftInjector v2.9.2 loaded");
+            Log.LogInfo("LetheGiftInjector v3.0.0 loaded");
             AddComponent<InjectorUI>();
+            AddComponent<TrialsUI>(); // NEW — only addition to existing plugin code
         }
     }
 
+    // ═══════════════════════════════════════════════════════════════════════
+    //  InjectorUI — unchanged from ver.2.9.2
+    // ═══════════════════════════════════════════════════════════════════════
     public class InjectorUI : MonoBehaviour
     {
         private static readonly HttpClient _http = new HttpClient();
@@ -46,7 +51,7 @@ namespace LetheGiftInjector
         private string    _egsKey      = "egs";
 
         private string _inputId   = "";
-        private string _inputTier = "0"; // Manual input default
+        private string _inputTier = "0";
         private string _searchQuery = "";
 
         private int _giftPage = 0;
@@ -67,9 +72,7 @@ namespace LetheGiftInjector
         };
         private int _kwIndex = 0;
 
-        // Tuple format: (ID, Name, Keyword, MaxTier)
         private readonly (int gid, string name, string kw, int maxTier)[] _allGifts = {
-            // ── Story Dungeon Gifts (1xxx) ────────────────────────────────────
             (1001,"Mask of a Devotee","None", 0),
             (1002,"Shoddy Dressing","None", 0),
             (1003,"Festered Fragment","None", 0),
@@ -84,7 +87,7 @@ namespace LetheGiftInjector
             (1018,"Writhing Ribbon","None", 0),
             (1024,"A Sign","None", 0),
             (1032,"Torch Stack","None", 0),
-            (1033,"Old Warehouse’s Key","None", 0),
+            (1033,"Old Warehouse's Key","None", 0),
             (1037,"N Corp. Seal","None", 0),
             (1038,"Token of Innocence","None", 0),
             (1039,"Token of Tears","None", 0),
@@ -92,13 +95,11 @@ namespace LetheGiftInjector
             (1041,"Hemorrhagic Hand","None", 0),
             (1042,"Sniggering Tongue","None", 0),
             (1043,"Token of Atonement","None", 0),
-            (1044,"Ritualist’s Right","None", 0),
+            (1044,"Ritualist's Right","None", 0),
             (1046,"Green Skin","None", 0),
             (1048,"Topfhelm","None", 0),
             (1049,"Hammer","Vibration", 0),
             (1050,"Nagel","Laceration", 0),
-
-            // ── Normal & Upgraded Gifts ───────────────────────────────────────
             (9001,"Hellterfly's Dream","Combustion", 2),
             (9002,"Perversion","None", 0),
             (9003,"Ashes to Ashes","Combustion", 2),
@@ -253,8 +254,6 @@ namespace LetheGiftInjector
             (9152,"Crushed Memory","Hit", 0),
             (9153,"Oracle","None", 0),
             (9154,"Imposed Weight","None", 0),
-
-            // ── Seasonal & Special Gifts ──────────────────────────────────────
             (9155,"Decamillennial Stewpot","Combustion", 0),
             (9156,"Decamillennial Hearthflame","Combustion", 0),
             (9157,"Secret Cookbook","Combustion", 0),
@@ -359,7 +358,6 @@ namespace LetheGiftInjector
             (9266,"Unoccupied Birdcage","None", 0),
             (9267,"Searing Brass","Combustion", 2),
             (9268,"Universal Instinct","Laceration", 0),
-
             (9403,"Ebony Brooch","Burst", 0),
             (9404,"Contained Maggots","Laceration", 0),
             (9407,"Made-to-Order","None", 0),
@@ -388,8 +386,7 @@ namespace LetheGiftInjector
             (9438,"Token of Victory","Laceration", 0),
             (9439,"Devouring Cube","None", 0),
             (9440,"Mask of the Parade","Laceration", 1),
-
-            (9701,"Hot ‘n Juicy Drumstick","Combustion", 0),
+            (9701,"Hot 'n Juicy Drumstick","Combustion", 0),
             (9702,"Dry-to-the-Bone Breast","Burst", 0),
             (9703,"Tango Marinade","None", 0),
             (9704,"Contaminated Needle & Thread","Laceration", 0),
@@ -567,7 +564,7 @@ namespace LetheGiftInjector
         {
             if (!_showPanel) return;
 
-            GUI.Box(_windowRect, "Lethe Gift Injector ver.2.9.2");
+            GUI.Box(_windowRect, "Lethe Gift Injector ver.3.0.0");
 
             var titleBar = new Rect(_windowRect.x, _windowRect.y, _windowRect.width, 20);
             var e = Event.current;
@@ -634,7 +631,6 @@ namespace LetheGiftInjector
 
             GUILayout.Space(4);
 
-            // ── Search field ─────────────────────────────────────────────────
             GUILayout.BeginHorizontal();
             GUILayout.Label("Search:", GUILayout.Width(48));
             string newQuery = GUILayout.TextField(_searchQuery, GUILayout.Width(340));
@@ -652,7 +648,6 @@ namespace LetheGiftInjector
 
             GUILayout.Space(2);
 
-            // ── Keyword filter buttons ────────────────────────────────────────
             GUILayout.BeginHorizontal();
             for (int i = 0; i < _kwRow1.Length; i++)
             {
@@ -675,7 +670,6 @@ namespace LetheGiftInjector
             }
             GUILayout.EndHorizontal();
 
-            // ── Build filtered list (keyword + search query) ──────────────────
             string selKw = _allKeywords[_kwIndex];
             string queryLower = _searchQuery.Trim().ToLowerInvariant();
             var filtered = new System.Collections.Generic.List<(int gid, string name, string kw, int maxTier)>();
@@ -700,8 +694,7 @@ namespace LetheGiftInjector
                 var g = filtered[i];
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(g.name, GUILayout.Width(450));
-                // Automatically inject the appropriate maxTier for the item
-                if (GUILayout.Button("+", GUILayout.Width(28))) AddToList(g.gid, g.maxTier); 
+                if (GUILayout.Button("+", GUILayout.Width(28))) AddToList(g.gid, g.maxTier);
                 GUILayout.EndHorizontal();
             }
 
@@ -859,9 +852,7 @@ namespace LetheGiftInjector
         {
             if (!int.TryParse(_inputId, out int id))
             { _status = "[Error] Invalid number"; return; }
-            
-            // For manual input, parse the _inputTier field (defaults to 0 safely)
-            if (!int.TryParse(_inputTier, out int tier) || tier < 0 || tier > 2) tier = 0; 
+            if (!int.TryParse(_inputTier, out int tier) || tier < 0 || tier > 2) tier = 0;
             AddToList(id, tier);
         }
 
@@ -882,10 +873,559 @@ namespace LetheGiftInjector
                 bool exists = false;
                 foreach (var (eid, _) in _pendingGifts)
                     if (eid == g.gid) { exists = true; break; }
-                // Pull maxTier directly from the item's array data
                 if (!exists) { _pendingGifts.Add((g.gid, g.maxTier)); added++; }
             }
             _status = $"{added} gift(s) added from filter (duplicates excluded)";
+        }
+
+        private static string EscapeJson(string s) =>
+            s.Replace("\\", "\\\\").Replace("\"", "\\\"");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  TrialsUI — NEW in ver.3.0.0
+    //  Toggle: ] key
+    //  Injects Trials & Adversities into the same 'egs' array as gifts.
+    //  Token is read from LetheGiftInjectorPlugin.TokenFilePath (shared).
+    //
+    //  NOTE: _allTrials is populated with IDs confirmed via the Lethe discord
+    //  trial/adversity lists. Add or remove entries as needed after checking
+    //  your own dumpedData. The "category" field is purely for UI filtering.
+    // ═══════════════════════════════════════════════════════════════════════
+    public class TrialsUI : MonoBehaviour
+    {
+        private static readonly HttpClient _http = new HttpClient();
+        private const string FETCH_URL  = "https://api.lethelc.site/dashboard/md/get";
+        private const string UPDATE_URL = "https://api.lethelc.site/dashboard/md/update";
+
+        private bool      _showPanel   = false;
+        private string    _token       = "";
+        private string    _status      = "";
+        private JsonNode? _state       = null;
+        private bool      _fetched     = false;
+        private Task?     _pendingTask = null;
+
+        private string _inputId = "";
+
+        private int _page = 0;
+        private const int PAGE_SIZE = 10;
+
+        private Rect    _windowRect = new Rect(580, 20, 480, 560);
+        private bool    _isDragging = false;
+        private Vector2 _dragOffset = Vector2.zero;
+
+        private string _searchQuery = "";
+
+        private System.Collections.Generic.List<int> _pendingIds
+            = new System.Collections.Generic.List<int>();
+
+        // Category filter
+        private readonly string[] _categories = { "All", "Trial", "Adversity" };
+        private int _catIndex = 0;
+
+        // ── Trial & Adversity data ────────────────────────────────────────
+        // Format: (id, name, category)
+        // Names sourced from Lethe discord — Mounting Trials List.txt / Mounting Adversities List.txt
+        private readonly (int id, string name, string cat)[] _allTrials = {
+            // ── Mounting Trials (992xxx) ──────────────────────────────────
+            // Floor 1-2
+            (992201, "Offense Level Up I",    "Trial"),
+            (992202, "Defense Level Up",      "Trial"),
+            (992203, "Resilient I",           "Trial"),
+            (992204, "Growth I",              "Trial"),
+            (992205, "Defense Skill Up",      "Trial"),
+            (992206, "Take Less Damage",      "Trial"),
+            // Floor 3
+            (992211, "Offense Level Up II",   "Trial"),
+            (992212, "Body Up I",             "Trial"),
+            (992213, "Keen I",                "Trial"),
+            (992214, "Resilient II",          "Trial"),
+            (992215, "Resilient III",         "Trial"),
+            (992216, "Growth II",             "Trial"),
+            (992217, "Headstrong I",          "Trial"),
+            // Floor 4
+            (992221, "Keen II",               "Trial"),
+            (992222, "Keen III",              "Trial"),
+            (992223, "Resilient IV",          "Trial"),
+            (992224, "Resilient V",           "Trial"),
+            (992225, "Growth III",            "Trial"),
+            (992226, "Clash Power Boost",     "Trial"),
+            (992227, "Final Power Boost",     "Trial"),
+            (992228, "Base Power Boost",      "Trial"),
+            // Floor 5
+            (992231, "Keen IV",               "Trial"),
+            (992232, "Body Up II",            "Trial"),
+            (992233, "Body Up III",           "Trial"),
+            (992234, "Growth IV",             "Trial"),
+            (992235, "Clash Power Spurt",     "Trial"),
+            (992236, "Final Power Spurt",     "Trial"),
+            (992237, "Base Power Spurt",      "Trial"),
+            (992238, "Brutality",             "Trial"),
+            (992239, "Headstrong II",         "Trial"),
+            // Floor 6
+            (992241, "Keen V",                "Trial"),
+            (992242, "Body Up IV",            "Trial"),
+            (992243, "Body Up V",             "Trial"),
+            (992244, "Growth V",              "Trial"),
+            (992245, "Clash Power Up II",     "Trial"),
+            (992246, "Final Power Up II",     "Trial"),
+            (992247, "Base Power Up II",      "Trial"),
+            (992248, "Brutality II",          "Trial"),
+            // Floor 7
+            (992251, "Keen VI",               "Trial"),
+            (992252, "Resilient VI",          "Trial"),
+            (992253, "Body Up VI",            "Trial"),
+            (992254, "Growth VI",             "Trial"),
+            (992255, "Clash Power Up III",    "Trial"),
+            (992256, "Final Power Up III",    "Trial"),
+            (992257, "Base Power Up III",     "Trial"),
+            (992258, "Brutality III",         "Trial"),
+            // Floor 8
+            (992261, "Keen VII",              "Trial"),
+            (992262, "Resilient VII",         "Trial"),
+            (992263, "Body Up VII",           "Trial"),
+            (992264, "Growth VII",            "Trial"),
+            (992265, "Clash Power Up IV",     "Trial"),
+            (992266, "Final Power Up IV",     "Trial"),
+            (992267, "Base Power Up IV",      "Trial"),
+            (992268, "Brutality IV",          "Trial"),
+            // Floor 9
+            (992271, "Keen VIII",             "Trial"),
+            (992272, "Resilient VIII",        "Trial"),
+            (992273, "Body Up VIII",          "Trial"),
+            (992274, "Growth VIII",           "Trial"),
+            (992275, "Clash Power Up V",      "Trial"),
+            (992276, "Final Power Up V",      "Trial"),
+            (992277, "Base Power Up V",       "Trial"),
+            (992278, "Brutality V",           "Trial"),
+            // Floor 10
+            (992281, "Keen IX",               "Trial"),
+            (992282, "Resilient IX",          "Trial"),
+            (992283, "Body Up IX",            "Trial"),
+            (992284, "Growth IX",             "Trial"),
+            (992285, "Clash Power Up VI",     "Trial"),
+            (992286, "Final Power Up VI",     "Trial"),
+            (992287, "Base Power Up VI",      "Trial"),
+            (992288, "Brutality VI",          "Trial"),
+            // Floor 12
+            (992386, "Keen XII",              "Trial"),
+            (992387, "Resilient XII",         "Trial"),
+            (992388, "Body Up XII",           "Trial"),
+            (992389, "Growth XII",            "Trial"),
+            (992390, "Clash Power Up VII",    "Trial"),
+            (992391, "Final Power Up VII",    "Trial"),
+            (992392, "Base Power Up VII",     "Trial"),
+            // Floor 13
+            (992393, "Keen XIII",             "Trial"),
+            (992394, "Resilient XIII",        "Trial"),
+            (992395, "Body Up XIII",          "Trial"),
+            (992396, "Growth XIII",           "Trial"),
+            (992397, "Clash Power Up VIII",   "Trial"),
+            (992398, "Final Power Up VIII",   "Trial"),
+            (992399, "Base Power Up VIII",    "Trial"),
+            // Floor 14
+            (992400, "Keen XIV",              "Trial"),
+            (992401, "Resilient XIV",         "Trial"),
+            (992402, "Body Up XIV",           "Trial"),
+            (992403, "Growth XIV",            "Trial"),
+            (992404, "Clash Power Up IX",     "Trial"),
+            (992405, "Final Power Up IX",     "Trial"),
+            (992406, "Base Power Up IX",      "Trial"),
+            // Floor 15
+            (992407, "Keen XV",               "Trial"),
+            (992408, "Resilient XV",          "Trial"),
+            (992409, "Body Up XV",            "Trial"),
+            (992410, "Growth XV",             "Trial"),
+            (992411, "Clash Power Up X",      "Trial"),
+            (992412, "Final Power Up X",      "Trial"),
+            (992413, "Base Power Up X",       "Trial"),
+            // Floor 16
+            (992414, "Keen XVI",              "Trial"),
+            (992415, "Resilient XVI",         "Trial"),
+            (992416, "Body Up XVI",           "Trial"),
+            (992417, "Growth XVI",            "Trial"),
+            (992418, "Clash Power Up XI",     "Trial"),
+            (992419, "Final Power Up XI",     "Trial"),
+            (992420, "Base Power Up XI",      "Trial"),
+
+            // ── Mounting Adversities (995xxx) ────────────────────────────
+            // Floor 10
+            (995011, "Level Boost I [F10]",          "Adversity"),
+            (995012, "Frailness I [F10]",             "Adversity"),
+            (995013, "Mark of Fire I",                "Adversity"),
+            (995014, "Inflation I",                   "Adversity"),
+            (995015, "Ego Interference I",            "Adversity"),
+            (995036, "Attack Level on Kill [F10]",    "Adversity"),
+            // Floor 11
+            (995016, "Level Boost I [F11]",           "Adversity"),
+            (995017, "Frailness I [F11]",             "Adversity"),
+            (995018, "Mental Psychosis I",            "Adversity"),
+            (995019, "Nerve Acceleration I",          "Adversity"),
+            (995020, "SP Fatigue I",                  "Adversity"),
+            (995037, "Enemy SP Regen [F11]",          "Adversity"),
+            // Floor 12
+            (995021, "Level Boost I [F12]",           "Adversity"),
+            (995022, "Frailness I [F12]",             "Adversity"),
+            (995023, "Tremor Barrier",                "Adversity"),
+            (995024, "Inflation II",                  "Adversity"),
+            (995025, "Ego Interference II",           "Adversity"),
+            (995038, "Enemy Shield 3000 [F12]",       "Adversity"),
+            // Floor 13
+            (995026, "Level Boost I [F13]",           "Adversity"),
+            (995027, "Frailness I [F13]",             "Adversity"),
+            (995028, "Vitality Boost",                "Adversity"),
+            (995029, "Brutality",                     "Adversity"),
+            (995030, "Mark of Fire II",               "Adversity"),
+            (995039, "Enemy Sin Count x2 [F13]",      "Adversity"),
+            // Floor 14
+            (995031, "Level Boost I [F14]",           "Adversity"),
+            (995032, "Frailness I [F14]",             "Adversity"),
+            (995033, "Mental Psychosis II",           "Adversity"),
+            (995034, "Nerve Acceleration II",         "Adversity"),
+            (995035, "SP Fatigue II",                 "Adversity"),
+            (995040, "Random Sin on Allies [F14]",    "Adversity"),
+        };
+
+        public TrialsUI(IntPtr ptr) : base(ptr) { }
+
+        private void Start()
+        {
+            try
+            {
+                if (File.Exists(LetheGiftInjectorPlugin.TokenFilePath))
+                {
+                    _token = File.ReadAllText(LetheGiftInjectorPlugin.TokenFilePath).Trim();
+                    _status = "Token loaded from file.";
+                }
+            }
+            catch (Exception ex)
+            {
+                LetheGiftInjectorPlugin.Log?.LogWarning(
+                    "[TrialsUI] Failed to load token: " + ex.Message);
+            }
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.RightBracket))
+                _showPanel = !_showPanel;
+
+            if (_pendingTask != null && _pendingTask.IsCompleted)
+            {
+                if (_pendingTask.IsFaulted)
+                    _status = "Error: " + (_pendingTask.Exception?.InnerException?.Message ?? "Unknown");
+                _pendingTask = null;
+            }
+        }
+
+        private void OnGUI()
+        {
+            if (!_showPanel) return;
+
+            GUI.Box(_windowRect, "Lethe Trials & Adversities ver.3.0.0");
+
+            var titleBar = new Rect(_windowRect.x, _windowRect.y, _windowRect.width, 20);
+            var e = Event.current;
+            if (e.type == EventType.MouseDown && titleBar.Contains(e.mousePosition))
+            {
+                _isDragging = true;
+                _dragOffset = new Vector2(_windowRect.x - e.mousePosition.x,
+                                          _windowRect.y - e.mousePosition.y);
+                e.Use();
+            }
+            else if (e.type == EventType.MouseDrag && _isDragging)
+            {
+                _windowRect.x = e.mousePosition.x + _dragOffset.x;
+                _windowRect.y = e.mousePosition.y + _dragOffset.y;
+                e.Use();
+            }
+            else if (e.type == EventType.MouseUp)
+            {
+                _isDragging = false;
+            }
+
+            GUILayout.BeginArea(new Rect(
+                _windowRect.x + 5,
+                _windowRect.y + 22,
+                _windowRect.width - 10,
+                _windowRect.height - 27));
+
+            // ── Token display (read-only; managed by InjectorUI) ──────────
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Token:", GUILayout.Width(48));
+            GUILayout.Label(
+                string.IsNullOrEmpty(_token) ? "(none — save via Gift panel)" : "(loaded)",
+                GUILayout.Width(260));
+            // Re-read from file in case InjectorUI saved it during this session
+            if (GUILayout.Button("Reload", GUILayout.Width(70))) ReloadToken();
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(4);
+
+            // ── Fetch / Update ────────────────────────────────────────────
+            bool isBusy = _pendingTask != null;
+            GUILayout.BeginHorizontal();
+            GUI.enabled = !isBusy && !string.IsNullOrEmpty(_token);
+            if (GUILayout.Button("① Fetch State", GUILayout.Width(150)))
+                _pendingTask = FetchStateAsync();
+            GUI.enabled = !isBusy && _fetched && _pendingIds.Count > 0;
+            if (GUILayout.Button("② Update State", GUILayout.Width(150)))
+                _pendingTask = UpdateStateAsync();
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label(isBusy ? "[Processing...]" : _status);
+            GUILayout.Label($"Queue: {_pendingIds.Count} item(s)");
+
+            GUILayout.Space(4);
+
+            // ── Manual ID entry ───────────────────────────────────────────
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("ID:", GUILayout.Width(20));
+            _inputId = GUILayout.TextField(_inputId, GUILayout.Width(80));
+            if (GUILayout.Button("Add", GUILayout.Width(55))) TryAdd();
+            if (GUILayout.Button("Clear", GUILayout.Width(55)))
+            {
+                _pendingIds.Clear();
+                _status = "Queue cleared.";
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(4);
+
+            // ── Search ────────────────────────────────────────────────────
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(48));
+            string newQuery = GUILayout.TextField(_searchQuery, GUILayout.Width(280));
+            if (newQuery != _searchQuery) { _searchQuery = newQuery; _page = 0; }
+            if (GUILayout.Button("X", GUILayout.Width(28))) { _searchQuery = ""; _page = 0; }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(2);
+
+            // ── Category filter ───────────────────────────────────────────
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < _categories.Length; i++)
+            {
+                int idx = i;
+                if (GUILayout.Toggle(_catIndex == idx, _categories[i], "Button", GUILayout.Width(100)))
+                {
+                    if (_catIndex != idx) { _catIndex = idx; _page = 0; }
+                }
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(2);
+
+            // ── Filtered list ─────────────────────────────────────────────
+            string selCat = _categories[_catIndex];
+            string qLower = _searchQuery.Trim().ToLowerInvariant();
+            var filtered = new System.Collections.Generic.List<(int id, string name, string cat)>();
+            foreach (var t in _allTrials)
+            {
+                bool catMatch    = selCat == "All" || t.cat == selCat;
+                bool searchMatch = string.IsNullOrEmpty(qLower)
+                    || t.name.ToLowerInvariant().Contains(qLower)
+                    || t.id.ToString().Contains(qLower);
+                if (catMatch && searchMatch) filtered.Add(t);
+            }
+
+            if (GUILayout.Button($"Add All Filtered ({filtered.Count})", GUILayout.Width(220)))
+                AddAllFiltered(filtered);
+
+            GUILayout.Space(2);
+
+            if (filtered.Count == 0)
+            {
+                GUILayout.Label("No entries. Populate _allTrials from dumpedData.");
+            }
+            else
+            {
+                int start = _page * PAGE_SIZE;
+                int end   = Math.Min(start + PAGE_SIZE, filtered.Count);
+                for (int i = start; i < end; i++)
+                {
+                    var t = filtered[i];
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label($"[{t.cat[0]}] {t.name}", GUILayout.Width(380));
+                    if (GUILayout.Button("+", GUILayout.Width(28))) AddToList(t.id);
+                    GUILayout.EndHorizontal();
+                }
+            }
+
+            int totalPages = Math.Max(1, (filtered.Count + PAGE_SIZE - 1) / PAGE_SIZE);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("<", GUILayout.Width(35)) && _page > 0) _page--;
+            GUILayout.Label($"{_page + 1} / {totalPages}", GUILayout.Width(65));
+            if (GUILayout.Button(">", GUILayout.Width(35)) && _page < totalPages - 1) _page++;
+            GUILayout.EndHorizontal();
+
+            GUILayout.EndArea();
+        }
+
+        private void ReloadToken()
+        {
+            try
+            {
+                if (File.Exists(LetheGiftInjectorPlugin.TokenFilePath))
+                {
+                    _token = File.ReadAllText(LetheGiftInjectorPlugin.TokenFilePath).Trim();
+                    _status = "Token reloaded.";
+                }
+                else
+                {
+                    _status = "Token file not found. Save token via Gift panel first.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _status = "Reload failed: " + ex.Message;
+            }
+        }
+
+        private async Task FetchStateAsync()
+        {
+            _status  = "Fetching...";
+            _fetched = false;
+            try
+            {
+                var reqBody  = $"{{\"token\":\"{EscapeJson(_token.Trim())}\"}}";
+                var content  = new StringContent(reqBody, Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync(FETCH_URL, content);
+                var respStr  = await response.Content.ReadAsStringAsync();
+
+                LetheGiftInjectorPlugin.Log?.LogInfo(
+                    $"[TrialsUI] Fetch response ({(int)response.StatusCode}): {respStr}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _status = $"Fetch failed ({(int)response.StatusCode}) — check logs";
+                    return;
+                }
+
+                _state = JsonNode.Parse(respStr);
+
+                var currentInfo = _state?["currentInfo"];
+                if (currentInfo == null)
+                {
+                    _status = "[Error] 'currentInfo' not found — check logs";
+                    LetheGiftInjectorPlugin.Log?.LogError(
+                        "[TrialsUI] FetchStateAsync: currentInfo is null.");
+                    return;
+                }
+
+                var egsNode = currentInfo["egs"];
+                if (egsNode == null)
+                {
+                    _status = "[Warning] 'egs' key missing — check logs";
+                    LetheGiftInjectorPlugin.Log?.LogWarning(
+                        "[TrialsUI] FetchStateAsync: 'egs' key missing.");
+                    _fetched = true;
+                    return;
+                }
+
+                _fetched = true;
+                _status  = $"Fetch successful. egs count: {egsNode.AsArray().Count}";
+            }
+            catch (Exception ex)
+            {
+                _status = "Fetch error: " + ex.Message;
+                LetheGiftInjectorPlugin.Log?.LogError("[TrialsUI] Fetch error: " + ex);
+            }
+        }
+
+        private async Task UpdateStateAsync()
+        {
+            if (_state == null) { _status = "[Error] No state. Run Fetch first."; return; }
+            _status = "Updating...";
+            try
+            {
+                var currentInfo = _state["currentInfo"];
+                if (currentInfo == null)
+                {
+                    _status = "[Error] currentInfo missing — check logs";
+                    return;
+                }
+
+                var egsNode = currentInfo["egs"];
+                if (egsNode == null)
+                {
+                    _status = "[Error] 'egs' key missing — check logs";
+                    return;
+                }
+
+                var egs   = egsNode.AsArray();
+                int added = 0;
+                foreach (var tid in _pendingIds)
+                {
+                    bool exists = false;
+                    foreach (var eg in egs)
+                        if (eg?["id"]?.GetValue<int>() == tid) { exists = true; break; }
+                    if (exists) continue;
+
+                    // Trials and adversities use ul:0 — they have no upgrade tier.
+                    egs.Add(new JsonObject
+                    {
+                        ["id"]   = tid,
+                        ["pids"] = new JsonArray(),
+                        ["un"]   = 0,
+                        ["ul"]   = 0
+                    });
+                    added++;
+                }
+
+                var payload = new JsonObject
+                {
+                    ["token"]    = _token.Trim(),
+                    ["saveInfo"] = JsonNode.Parse(_state.ToJsonString())
+                };
+
+                var content  = new StringContent(payload.ToJsonString(), Encoding.UTF8, "application/json");
+                var response = await _http.PostAsync(UPDATE_URL, content);
+                var respStr  = await response.Content.ReadAsStringAsync();
+
+                LetheGiftInjectorPlugin.Log?.LogInfo(
+                    $"[TrialsUI] Update response ({(int)response.StatusCode}): {respStr}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _status = $"Update failed ({(int)response.StatusCode}) — check logs";
+                    return;
+                }
+
+                _status = $"Update successful. {added} entry(s) added. Takes effect on dungeon entry.";
+                _pendingIds.Clear();
+            }
+            catch (Exception ex)
+            {
+                _status = "Update error: " + ex.Message;
+                LetheGiftInjectorPlugin.Log?.LogError("[TrialsUI] Update error: " + ex);
+            }
+        }
+
+        private void TryAdd()
+        {
+            if (!int.TryParse(_inputId, out int id))
+            { _status = "[Error] Invalid number"; return; }
+            AddToList(id);
+        }
+
+        private void AddToList(int id)
+        {
+            if (_pendingIds.Contains(id)) { _status = $"ID {id} already in queue"; return; }
+            _pendingIds.Add(id);
+            _status = $"ID {id} added";
+        }
+
+        private void AddAllFiltered(
+            System.Collections.Generic.List<(int id, string name, string cat)> filtered)
+        {
+            int added = 0;
+            foreach (var t in filtered)
+            {
+                if (!_pendingIds.Contains(t.id)) { _pendingIds.Add(t.id); added++; }
+            }
+            _status = $"{added} entry(s) added from filter (duplicates excluded)";
         }
 
         private static string EscapeJson(string s) =>
